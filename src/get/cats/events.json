@@ -1,0 +1,40 @@
+{
+  "resource": "/cats",
+  "path": "/cats",
+  "httpMethod": "GET",
+  "headers": {
+    "Accept": "*/*",
+    "Host": "localhost:3000",
+    "User-Agent": "curl/7.64.1"
+  },
+  "queryStringParameters": {
+    "catType": "siamese",
+    "limit": "10",
+    "next": "eyJrZXkiOiAiMTIzNDU2IiwgIm5hbWUiOiAic2FtZSBwYXJhbWV0ZXIifQ=="
+  },
+  "pathParameters": {},
+  "requestContext": {
+    "accountId": "123456789012",
+    "resourceId": "abcd1234",
+    "stage": "prod",
+    "requestId": "efgh5678",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "127.0.0.1",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "curl/7.64.1",
+      "user": null
+    },
+    "resourcePath": "/cats",
+    "httpMethod": "GET",
+    "apiId": "wxyz9876",
+    "protocol": "HTTP/1.1"
+  }
+}

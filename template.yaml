@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: API Gateway controlling a Cat Database in DynamoDB
+
+Resources:
+  # DynamoDB table to store cat information
+  CatBreeds:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: 'CatBreeds'
+      AttributeDefinitions:
+        - AttributeName: 'id'
+          AttributeType: 'S'
+        - AttributeName: 'breed'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'id'
+          KeyType: 'HASH'
+      BillingMode: 'PAY_PER_REQUEST'
+      GlobalSecondaryIndexes:
+        - IndexName: 'BreedIndex'
+          KeySchema:
+            - AttributeName: 'breed'
+              KeyType: 'HASH'
+          Projection:
+            ProjectionType: 'ALL'
+
+  # Lambda function for getting a paginated list of cats
+  GetCatsFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: 'GetCatsFunction'
+      Timeout: 2000
+      MemorySize: 512
+      Handler: 'index.handler'
+      Runtime: 'nodejs14.x'
+      CodeUri: ./src/get/cats/
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref CatBreeds
+      Events:
+        ApiGatewayEvent:
+          Type: Api
+          Properties:
+            Path: /cats
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        EntryPoints:
+          - index.ts
+
+  # Lambda function for getting cats by breed
+  GetCatByBreedFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: 'GetCatByBreedFunction'
+      Timeout: 2000
+      MemorySize: 512
+      Handler: 'index.handler'
+      Runtime: 'nodejs14.x'
+      CodeUri: ./src/get/cat/
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref CatBreeds
+      Events:
+        ApiGatewayEvent:
+          Type: Api
+          Properties:
+            Path: /cat/{breed}
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        EntryPoints:
+          - index.ts
+
+  # Lambda function for adding a new cat to the database
+  PostCatFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: 'PostCatFunction'
+      Timeout: 2000
+      MemorySize: 512
+      Handler: 'index.handler'
+      Runtime: 'nodejs14.x'
+      CodeUri: ./src/post/
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref CatBreeds
+      Events:
+        ApiGatewayEvent:
+          Type: Api
+          Properties:
+            Path: /cat
+            Method: POST
+
+  # Lambda function for updating an existing cat's details
+  PutCatFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: 'PutCatFunction'
+      Timeout: 2000
+      MemorySize: 512
+      Handler: 'index.handler'
+      Runtime: 'nodejs14.x'
+      CodeUri: ./src/put/
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref CatBreeds
+      Events:
+        ApiGatewayEvent:
+          Type: Api
+          Properties:
+            Path: /cat/{catType}
+            Method: PUT
+
+  # Lambda function for deleting a cat from the database
+  DeleteCatFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: 'DeleteCatFunction'
+      Timeout: 2000
+      MemorySize: 512
+      Handler: 'index.handler'
+      Runtime: 'nodejs14.x'
+      CodeUri: ./src/delete/
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref CatBreeds
+      Events:
+        ApiGatewayEvent:
+          Type: Api
+          Properties:
+            Path: /cats/{catType}
+            Method: DELETE
+
+# Outputs
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/cats"
